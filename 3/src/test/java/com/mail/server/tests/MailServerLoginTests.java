@@ -7,27 +7,32 @@ import org.testng.annotations.Test;
 
 public class MailServerLoginTests extends TestBase {
 
-	@Test(enabled = true)
-	public void succsedLoginToMailServer_InboxUserValue() throws Throwable {
+	@Test(dataProvider = "InboxUserTrueValue", enabled = true)
+	public void succsedLoginToMailServer_InboxUserValue(String userName, String password, String inboxUserValue ) throws Throwable {
 
+		String waitForInboxUserValue = "//span[@title='" + inboxUserValue + "']";
+		String expectedUserInfo = inboxUserValue;	
+		
 		navigateToMainMailServerPage();
-		loginToMailServer();
+		loginToMailServerAndWait(userName, password, waitForInboxUserValue);
 		String userInfo = getInboxUserInfo();
-		String expectedUserInfo = "Tarazevich, Georgy";
-
+		
 		assertThat(userInfo, equalTo(expectedUserInfo));
 	}
 
 	@Test(enabled = false)
 	public void succsedLoginToMailServer_PaneLauncherValue() throws Throwable {
 
-		navigateToMainMailServerPage();
-
-		loginToMailServer();
+		String userName = "itransition\\g.tarazevich";
+		String password = "123456";
+		String waitForPaneLauncher = ".//*[@id='O365_TopMenu']/div/div/div[1]/div[14]/button";
+		String expectedUserInfo = "g.tarazevich@a1qa.com";
 		
-		String userInfo = getUserInfoFromPersonaPaneLauncher();
-		String expectedUserInfo = " ";
-
+		navigateToMainMailServerPage();
+		loginToMailServerAndWait(userName, password, waitForPaneLauncher);
+		 
+		String userInfo = getPaneLauncherUserInfo(waitForPaneLauncher );
+		
 		assertThat(userInfo, equalTo(expectedUserInfo));
 	}
 

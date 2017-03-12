@@ -11,35 +11,28 @@ import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.FluentWait;
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
+import org.testng.annotations.DataProvider;
 
 public class TestBase {
 	private String baseUrl = "https://webmail.itransition.com";
-	private String userName = "itransition\\g.tarazevich";
-	private String password = "123456";
 	private WebDriver driver;
 
-	public void loginToMailServer() {
+	public void loginToMailServerAndWait(String userName, String password,
+			String waitForElement) {
 
 		WebElement usernameWebElement = driver.findElement(By
 				.xpath(".//*[@id='username']"));
-
 		usernameWebElement.sendKeys(userName);
 
 		WebElement passwordWebElement = driver.findElement(By
 				.xpath(".//*[@id='password']"));
-
 		passwordWebElement.sendKeys(password);
 
 		WebElement submitCredsWebElement = driver.findElement(By
 				.xpath(".//*[@id='SubmitCreds']"));
-
 		submitCredsWebElement.click();
 
-		(new FluentWait<WebDriver>(driver).withTimeout(30, TimeUnit.SECONDS)
-				.pollingEvery(2, TimeUnit.SECONDS)
-				.ignoring(NoSuchElementException.class))
-				.until(ExpectedConditions.elementToBeClickable(By
-						.xpath("//span[@title='Tarazevich, Georgy']")));
+		waitForElementToBeClickable(waitForElement);
 	}
 
 	public String getInboxUserInfo() {
@@ -48,13 +41,13 @@ public class TestBase {
 				By.xpath("//span[@title='Tarazevich, Georgy']")).getText();
 	};
 
-	public void  openPersonaPaneLauncher() {
-		
-		
-	}
+	public String getPaneLauncherUserInfo(String waitForPaneLauncher)
+			throws Throwable {
 
-	public String getUserInfoFromPersonaPaneLauncher() {
-		return "";
+		Thread.sleep(40000);
+		driver.findElement(By.xpath(waitForPaneLauncher)).click();
+		return driver.findElement(
+				By.xpath("//span[text()='g.tarazevich@a1qa.com']")).getText();
 	}
 
 	public void navigateToMainMailServerPage() {
@@ -62,6 +55,16 @@ public class TestBase {
 			driver.get(baseUrl);
 		} catch (Exception e) {
 		}
+	}
+
+	private void waitForElementToBeClickable(String xPathElement) {
+
+		(new FluentWait<WebDriver>(driver).withTimeout(30, TimeUnit.SECONDS)
+				.pollingEvery(2, TimeUnit.SECONDS)
+				.ignoring(NoSuchElementException.class))
+				.until(ExpectedConditions.elementToBeClickable(By
+						.xpath(xPathElement)));
+
 	}
 
 	@BeforeMethod
@@ -73,4 +76,10 @@ public class TestBase {
 	public void tearDown() {
 		driver.quit();
 	}
+
+	@DataProvider(name = "InboxUserTrueValue()")
+	public Object[][] InboxUserTrueValue() {
+		return new Object[][] { { "itransition\\g.tarazevich", "123456", "Tarazevich, Georgy" } };
+	}
+
 }
